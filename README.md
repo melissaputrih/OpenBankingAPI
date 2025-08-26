@@ -1,5 +1,5 @@
 # OpenBankingAPI
-This repository contains Python scripts and data files for scraping, compiling, and analyzing Open Banking API performance data.
+This repository contains Python scripts and related data files to analyzing Open Banking API performance data.
 
 ## Repository Contents
 - `webscrap.py` – Python script for web scraping HTML data  
