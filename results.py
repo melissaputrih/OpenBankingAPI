@@ -4,17 +4,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.cm as cm
 import matplotlib.ticker as mticker
-from matplotlib.font_manager import FontProperties
-from scipy.stats import shapiro, mannwhitneyu, kruskal, spearmanr
+import statsmodels.api as sm
 import scikit_posthocs as sp
 import pymannkendall as mk
 from scipy.stats import skew
-
-
-from linearmodels.panel import PanelOLS, RandomEffects
-from linearmodels.panel import compare
+from linearmodels.panel import PanelOLS, RandomEffects, compare
 from statsmodels.tools.tools import add_constant
-import statsmodels.api as sm
+from matplotlib.font_manager import FontProperties
+from scipy.stats import shapiro, mannwhitneyu, kruskal, spearmanr
 
 
 
@@ -1269,4 +1266,5 @@ order = [0, 1, 2, 3, 4]  # Adjust if needed
 plt.legend([handles[i] for i in order], [labels[i] for i in order])
 plt.tight_layout()
 plt.show()
+
 
