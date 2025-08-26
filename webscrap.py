@@ -49,7 +49,7 @@ def extract_modal_tables(soup, month):
         brand_title = modal.find('h4', class_='m22__brand-modal--title').text.strip()
         brand = brand_title.replace(' Availability by Endpoint Category:', '')
         mth = modal.find('span', class_='m22__brand-modal--month').text.strip()
-        # Standardize month
+        # Standardise month
         mth_fmt = month
         match = re.search(r'([A-Za-z]+)\s+(\d{4})', mth)
         if match:
@@ -149,3 +149,4 @@ with pd.ExcelWriter('openbanking_all_months.xlsx') as writer:
         big_modal.to_excel(writer, sheet_name='BrandEndpointAvail', index=False)
 
 print("Exported all months to openbanking_all_months.xlsx")
+
