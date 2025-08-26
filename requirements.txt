@@ -1,5 +1,12 @@
 pandas
 numpy
+matplotlib
+seaborn
+scipy
+scikit-posthocs
+pymannkendall
+linearmodels
+statsmodels
+openpyxl
 beautifulsoup4
 requests
-openpyxl
