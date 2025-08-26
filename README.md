@@ -5,7 +5,8 @@ This repository contains Python scripts and data files for scraping, compiling, 
 - `webscrap.py` – Python script for web scraping HTML data  
 - `results.py` – Python script for processing compiled data  
 - `Monthly_data.zip` – Zipped folder containing monthly HTML data files  
-- `datacompile.xlsx` – Excel file used for storing compiled data  
+- `datacompile.xlsx` – Excel file used for storing compiled data
+-  `requirements.txt` – List of Python dependencies needed to run the scripts    
 
 ## Requirements
 - Python 3.8 or higher  
