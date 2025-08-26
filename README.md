@@ -11,11 +11,19 @@ This repository contains Python scripts and data files for scraping, compiling, 
 ## Requirements
 - Python 3.8 or higher  
 - Required packages:  
-  - pandas  
-  - numpy  
-  - beautifulsoup4  
-  - requests  
-  - openpyxl  
+  - pandas
+  - numpy
+  - matplotlib
+  - seaborn
+  - scipy
+  - scikit-posthocs
+  - pymannkendall
+  - linearmodels
+  - statsmodels
+  - beautifulsoup4
+  - requests
+  - openpyxl
+
 
 Install dependencies with:  
 ```bash
