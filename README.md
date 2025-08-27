@@ -7,7 +7,7 @@ This repository contains Python scripts and related data files to analyzing Open
 - `Monthly_data.zip` – Zipped folder containing monthly HTML data files  
 - `datacompile.xlsx` – Excel file used for storing compiled data
 -  `requirements.txt` – List of Python dependencies needed to run the scripts
--  `Bank Financial Data.xlsx` - Financial Data of Each Bank (additional data, unused further in the analysis due to insignificant result)
+-  `Bank Financial Data-up.xlsx` - Financial Data of Each Bank (additional data, unused further in the analysis due to insignificant result)
 
 ## Requirements
 - Python 3.8 or higher  
