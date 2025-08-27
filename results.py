@@ -1268,3 +1268,105 @@ plt.tight_layout()
 plt.show()
 
 
+
+"""
+Appendix D.3 - API Performance FE model
+"""
+
+api = pd.read_excel("datacompile.xlsx")
+fin = pd.read_excel("Bank Financial Data-up.xlsx")
+
+# cleanup
+def clean_cols(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df.columns = [re.sub(r"\s+", " ", str(c)).strip() for c in df.columns]
+    return df
+def pick_and_impute_financials(df: pd.DataFrame, metrics: list, min_cov=0.6, k=6):
+    d = df.copy()
+    for c in metrics:
+        d[c] = pd.to_numeric(d[c], errors="coerce")
+    coverage = d[metrics].notna().mean()
+    kept = [c for c in metrics if coverage.get(c, 0) >= min_cov]
+    chosen = []
+    for c in kept:
+        s = d[c]
+        pos_share = (s.dropna() > 0).mean() if s.notna().any() else 0.0
+        if pos_share >= min_cov:
+            s_pos = s.where(s > 0, np.nan)
+            logc = f"log_{c}"
+            d[logc] = np.log(s_pos)
+            if d[logc].notna().mean() >= min_cov:
+                chosen.append(logc)
+                continue
+        chosen.append(c)
+    cov_used = {c: d[c].notna().mean() for c in chosen}
+    chosen = sorted(chosen, key=lambda c: cov_used[c], reverse=True)[:k]
+    for c in chosen:
+        d[c] = d.groupby("Brand")[c].transform(lambda s: s.fillna(s.median()))
+        d[c] = d[c].fillna(d[c].median())
+    return d, chosen
+def compact_table_panel(res, label_r2="R² (Within)"):
+    rows = []
+    for name in res.params.index:
+        rows.append({
+            "Variable": name,
+            "Coefficient": round(res.params[name], 4),
+            "p-value": round(res.pvalues[name], 4),
+        })
+    rows.append({"Variable": label_r2, "Coefficient": "", "p-value": round(res.rsquared_within, 4)})
+    return pd.DataFrame(rows)
+def fit_panel_ols(df_panel: pd.DataFrame, dv: str, x_cols, entity_fe=True, time_fe=True):
+    y = df_panel[dv]
+    exog = df_panel[x_cols].copy().astype(float)
+    keep = (~y.isna()) & (~exog.isna().any(axis=1))
+    y = y.loc[keep]
+    exog = exog.loc[keep]
+    try:
+        res = PanelOLS(y, exog, entity_effects=entity_fe, time_effects=time_fe)\
+              .fit(cov_type='clustered', cluster_entity=True)
+    except TypeError:
+        res = PanelOLS(y, exog, entity_effects=entity_fe, time_effects=time_fe)\
+              .fit(cov_type='robust')
+    return res
+
+
+# prepare
+api = clean_cols(api)
+api["Month"] = pd.to_datetime(api["Month"], errors="coerce")
+api["Brand"] = api["Brand"].astype(str).str.strip()
+api["Year"]  = api["Month"].dt.year
+api = api[api["Total API Call Usage"] > 0].copy()
+api["Log_Usage"] = np.log(api["Total API Call Usage"])
+
+fin = clean_cols(fin)
+fin["Brand"] = fin["Brand"].astype(str).str.strip()
+fin["Year"]  = pd.to_numeric(fin["Year"], errors="coerce").astype("Int64")
+
+fin_metric_cols = [c for c in fin.columns if c not in ("Brand", "Year")]
+merged = api.merge(fin, how="left", on=["Brand", "Year"])
+
+# Run models 
+results_tables = {}
+
+for dv in ["Availability", "Success Rate", "Response Time"]:
+    print(f"\n================ {dv} ================")
+
+    use_cols = ["Brand", "Month", dv, "Log_Usage"] + fin_metric_cols
+    df = merged[use_cols].copy()
+    df[dv] = pd.to_numeric(df[dv], errors="coerce")
+    df = df.dropna(subset=["Brand", "Month", dv, "Log_Usage"])
+
+    # Select financials
+    df_fin, chosen_fin = pick_and_impute_financials(df, fin_metric_cols, min_cov=MIN_COVERAGE, k=K_FIN)
+
+    # Prepare panel
+    panel_cols = ["Brand", "Month", dv, "Log_Usage"] + chosen_fin
+    dfp = df_fin[panel_cols].copy().set_index(["Brand", "Month"]).sort_index()
+
+    spec_vars = ["Log_Usage"] + chosen_fin
+
+    res = fit_panel_ols(dfp, dv, x_cols=spec_vars, entity_fe=True, time_fe=True)
+    tab = compact_table_panel(res)
+    print(tab.to_string(index=False))
+
+    results_tables[f"{dv}_WithUsage_WithinFE"] = tab
